@@ -19,3 +19,7 @@ heroku config:set PATH=/app/.jdk/bin:$APP_PATH
 1. Procfile
 2. system.properties
 3. Maven to use Spark
+
+## References
+* [ClearDB MySQL Database] (https://devcenter.heroku.com/articles/cleardb#using-cleardb-in-a-play-framework-app)
+* [Customizing the JDK] (https://devcenter.heroku.com/articles/customizing-the-jdk)
