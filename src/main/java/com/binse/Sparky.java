@@ -10,7 +10,9 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.fileupload.FileUploadException;
@@ -25,6 +27,12 @@ import spark.Route;
 
 public class Sparky {
     
+	private static final SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy");
+
+	private static String toKeyValueString(final Map<String, Float> averages, final String key) {
+		return key + ": " + averages.get(key) + '\n';
+	}
+
 	public static void main(String[] args) {
 		
 		setPort(Integer.parseInt(System.getenv("PORT")));
@@ -32,11 +40,56 @@ public class Sparky {
 		// Configure the session factory
 		HibernateUtil.configureSessionFactory();
 		
-		get(new Route("/hi") {
+		get(new Route("/") {
 			@Override
 			public Object handle(Request req, Response res) {
-				return "HelloWorld";
+				StringBuilder form = new StringBuilder();
+				 
+                form.append("<form id='stats-form' method='POST' action='/stats'>")
+                        .append("Stock Tick Code: <input type='text' name='stockcode' />")
+                        .append("<br/>")
+                        .append("From Date(DD-MM-YYYY): <input type='text' name='fromdate' />")
+                        .append("<br/>")
+                        .append("To Date(DD-MM-YYYY): <input type='text' name='todate' />")
+                        .append("<br/>")
+                    .append("<input type='submit' value='Submit' form='stats-form' />");
+                return form.toString();
 			}
+		});
+		
+		post(new Route("/stats") {
+			@Override
+			public Object handle(Request req, Response res) {
+				String stockcode="", fromdate="", todate="";
+				Date from=null, to=null;
+				try{
+				stockcode = req.queryParams("stockcode").trim().toUpperCase();
+				fromdate = req.queryParams("fromdate");
+				todate = req.queryParams("todate");
+				
+				from = sdf.parse(fromdate);				
+				to = sdf.parse(todate);
+				} catch (Exception e) {
+					res.status(400);
+					return "Invalid Input.. Try again!";
+				}
+				System.out.println("fromDate:"+fromdate + ", from:" + sdf.format(from));
+				System.out.println("toDate:"+todate + ", from:" + sdf.format(to));
+				
+				Map<String, Float> averages = StockTic.stats(from, to, stockcode);
+				res.status(200);
+				StringBuilder sb = new StringBuilder();
+				sb.append("Code:"+stockcode+'\n')
+				.append(toKeyValueString(averages, StockTic.AVG_TOTAL_TRADED_QUANTITY))
+				.append(toKeyValueString(averages, StockTic.AVG_HIGH_PRICE))
+				.append(toKeyValueString(averages, StockTic.AVG_LOW_PRICE))
+				.append(toKeyValueString(averages, StockTic.AVG_CLOSE_PRICE))
+				.append(toKeyValueString(averages, StockTic.AVG_LAST_TRADED_PRICE))
+				.append(toKeyValueString(averages, StockTic.AVG_TURNOVER));
+				
+				return sb.toString();
+			}
+
 		});
 
 		get(new Route("/upload") {

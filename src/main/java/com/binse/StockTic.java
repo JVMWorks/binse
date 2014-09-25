@@ -2,6 +2,9 @@ package com.binse;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -9,7 +12,11 @@ import javax.persistence.Id;
 import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
 
+import org.hibernate.Criteria;
+import org.hibernate.HibernateException;
+import org.hibernate.Session;
 import org.hibernate.annotations.GenericGenerator;
+import org.hibernate.criterion.Restrictions;
 
 
 //@DynamicUpdate
@@ -17,7 +24,15 @@ import org.hibernate.annotations.GenericGenerator;
 @Table(name = "stock_tic")
 public class StockTic {
 
-    @Id
+    public static final String AVG_HIGH_PRICE = "AVG-HIGH-PRICE";
+    public static final String AVG_LOW_PRICE = "AVG-LOW-PRICE";
+    public static final String AVG_LAST_TRADED_PRICE = "AVG-LAST-TRADED-PRICE";
+    public static final String AVG_OPEN_PRICE = "AVG-OPEN-PRICE";
+    public static final String AVG_CLOSE_PRICE = "AVG-CLOSE-PRICE";
+    public static final String AVG_TURNOVER = "AVG-TURNOVER";
+    public static final String AVG_TOTAL_TRADED_QUANTITY = "AVG-TOTAL-TRADED-QUANTITY";
+
+	@Id
     @GeneratedValue(generator="increment")
     @GenericGenerator(name="increment", strategy="increment")
     private Long stockTicId; //DB only
@@ -50,6 +65,8 @@ public class StockTic {
 	private float turnover;
     
 	SimpleDateFormat dateFormatter = new SimpleDateFormat("dd-MMM-yyyy");
+	
+	public StockTic() {	}
 	
 	public StockTic(String name, Date date, float openPrice, float highPrice,
 			float lowPrice, float lastTradedPrice, float closePrice,
@@ -109,5 +126,60 @@ public class StockTic {
 		return turnover;
 	}
 
+	public static Map<String, Float> stats(Date from, Date to, String code) {
+		System.out.print("Tic:"+code + ", from:"+from + ", to:"+to);
+		Criteria criteria = getSession().createCriteria(StockTic.class);
+		criteria.add(Restrictions.eq("name", code));
+		criteria.add(Restrictions.ge("date", from));
+		criteria.add(Restrictions.le("date", to));
+		List<StockTic> stocks = null;
+		try {
+			stocks = (List<StockTic>) criteria.list();
+		} catch (HibernateException e) {
+			e.printStackTrace();
+		} finally {
+			getSession().close();
+		}
+		System.out.println("------------");
+		sout(stocks);
+		System.out.println("------------");
+		return computeAverages(stocks);
+	}
+	
+	private static void sout(List<StockTic> stocks) {
+		for(StockTic tic : stocks) {
+			System.out.println(tic.toString());
+		}
+	}
+
+	private static Map<String, Float> computeAverages(List<StockTic> stocks) {
+		float sumHighPrice=0, sumLowPrice=0, sumLastTradedPrice=0, sumOpenPrice=0, sumClosePrice=0, sumTotalTradedQuantity=0, sumTurnover=0;
+		
+		HashMap<String, Float> hm = new HashMap<String, Float>();
+		for(StockTic stock : stocks) {
+			sumHighPrice +=stock.getHighPrice(); 
+			sumLowPrice += stock.getLowPrice();
+			sumLastTradedPrice += stock.getLastTradedPrice();
+			sumOpenPrice += stock.getOpenPrice();
+			sumClosePrice += stock.getClosePrice();
+			sumTotalTradedQuantity += stock.getTotalTradedQuantity();
+			sumTurnover += stock.getTurnover();
+		}
+		
+		int size = stocks.size();
+		if(size==0) size = 1; //To avoid Division-By-Zero Error
+		hm.put(AVG_HIGH_PRICE, (sumHighPrice/size));
+		hm.put(AVG_LOW_PRICE, (sumLowPrice/size));
+		hm.put(AVG_LAST_TRADED_PRICE, (sumLastTradedPrice/size));
+		hm.put(AVG_OPEN_PRICE, (sumOpenPrice/size));
+		hm.put(AVG_CLOSE_PRICE, (sumClosePrice/size));
+		hm.put(AVG_TOTAL_TRADED_QUANTITY, (sumTotalTradedQuantity/size));
+		hm.put(AVG_TURNOVER, (sumTurnover/size));
+		return hm;
+	}
+
+	private static Session getSession() {
+		return HibernateUtil.getSession();
+	}
 	
 }
