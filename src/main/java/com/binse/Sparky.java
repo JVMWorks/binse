@@ -21,20 +21,18 @@ import org.apache.commons.fileupload.servlet.ServletFileUpload;
 import org.apache.commons.io.FilenameUtils;
 import org.hibernate.Session;
 
-import spark.ModelAndView;
 import spark.Request;
 import spark.Response;
 import spark.Route;
-import spark.template.mustache.MustacheRout;
 import spark.template.mustache.MustacheTemplateRoute;
 
 public class Sparky {
     
 	private static final SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy");
 
-	private static String toKeyValueString(final Map<String, Float> averages, final String key) {
-		return key + ": " + averages.get(key) + '\n';
-	}
+//	private static String toKeyValueString(final Map<String, Object> averages, final String key) {
+//		return key + ": " + averages.get(key) + '\n';
+//	}
 
 	public static void main(String[] args) {
 		
@@ -62,7 +60,8 @@ public class Sparky {
 		
 		post(new MustacheTemplateRoute("/stats") {
 			@Override
-			public ModelAndView handle(Request req, Response res) {
+			@SuppressWarnings("unchecked")
+			public Object handle(Request req, Response res) {
 				String stockcode="", fromdate="", todate="";
 				Date from=null, to=null;
 				try{
@@ -75,28 +74,13 @@ public class Sparky {
 				} catch (Exception e) {
 					res.status(400);
 					return null;
-//					return "Invalid Input.. Try again!";
 				}
-				System.out.println("fromDate:"+fromdate + ", from:" + sdf.format(from));
-				System.out.println("toDate:"+todate + ", from:" + sdf.format(to));
 				
-				Map<String, Float> averages = StockTic.stats(from, to, stockcode);
+				Map<String, Object> averages = (Map) StockTic.stats(from, to, stockcode);
+				averages.put("CODE", stockcode);
 				res.status(200);
-				StringBuilder sb = new StringBuilder();
-				sb.append("Code:"+stockcode+'\n')
-				.append(toKeyValueString(averages, StockTic.AVG_TOTAL_TRADED_QUANTITY))
-				.append(toKeyValueString(averages, StockTic.AVG_HIGH_PRICE))
-				.append(toKeyValueString(averages, StockTic.AVG_LOW_PRICE))
-				.append(toKeyValueString(averages, StockTic.AVG_CLOSE_PRICE))
-				.append(toKeyValueString(averages, StockTic.AVG_LAST_TRADED_PRICE))
-				.append(toKeyValueString(averages, StockTic.AVG_TURNOVER));
-				
-				//return sb.toString();
-				// The hello.mustache file is located in directory:
-                // src/test/resources/spark/template/mustache
-                return new ModelAndView(averages, "stats.mustache");
+                return template("stats.mustache").render(averages);
 			}
-
 		});
 
 		get(new Route("/upload") {
@@ -114,6 +98,7 @@ public class Sparky {
 		
 		post(new Route("/upload") {
 			@Override
+			@SuppressWarnings("unchecked")
 			public Object handle(Request req, Response res) {
 				try {
 					List<FileItem> items = new ServletFileUpload(new DiskFileItemFactory()).parseRequest(req.raw());
@@ -151,8 +136,7 @@ public class Sparky {
 			        }
 				} catch (FileUploadException | IOException | NumberFormatException | ParseException e) {
 					e.printStackTrace();
-				}
-				
+				}				
 				return "Upload successful";
 			}
 		});

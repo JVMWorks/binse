@@ -50,7 +50,7 @@ public abstract class MustacheTemplateRoute extends TemplateRoute {
      */
     protected MustacheTemplateRoute(String path) {
         super(path);
-        mustacheFactory = new DefaultMustacheFactory();
+        mustacheFactory = new DefaultMustacheFactory("spark/template/mustache");
     }
 
     /**

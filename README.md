@@ -23,3 +23,4 @@ heroku config:set PATH=/app/.jdk/bin:$APP_PATH
 ## References
 * [ClearDB MySQL Database] (https://devcenter.heroku.com/articles/cleardb#using-cleardb-in-a-play-framework-app)
 * [Customizing the JDK] (https://devcenter.heroku.com/articles/customizing-the-jdk)
+* [ MustacheTemplateExample.java] (https://github.com/heuermh/sparkling/blob/master/sparkling-template/mustache-example/src/main/java/sparkling/template/mustache/example/MustacheTemplateExample.java)
