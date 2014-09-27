@@ -5,17 +5,11 @@
 <hibernate-configuration>
 
 	<session-factory>
-		<!-- <property name="hibernate.dialect">org.hibernate.dialect.PostgreSQL9Dialect</property> 
-			<property name="hibernate.connection.driver_class">org.postgresql.Driver</property> 
-			<property name="hibernate.connection.username">binse</property> <property 
-			name="hibernate.connection.url">jdbc:postgresql://localhost/binse</property> -->
-
-		<property name="dialect">org.hibernate.dialect.SQLiteDialect</property>
-		<property name="connection.driver_class">org.sqlite.JDBC</property>
-		<property name="connection.url">jdbc:sqlite:binse.db</property>
-		<property name="connection.username"></property>
-		<property name="connection.password"></property>
-		
+		<property name="hibernate.dialect">org.hibernate.dialect.PostgreSQL9Dialect</property>
+		<property name="hibernate.connection.driver_class">org.postgresql.Driver</property>
+		<property name="hibernate.connection.username">karthiks</property>
+		<!--<property name="hibernate.connection.url">jdbc:heroku-postgresql:hobby-dev</property>-->
+		<property name="hibernate.connection.url">jdbc:postgres://localhost:5432/binse;create=true</property>
 		<property name="connection_pool_size">10</property>
 
 		<!-- This flag automatically updates the database schema to match the currently 
@@ -28,8 +22,7 @@
 		<property name="show_sql">true</property>
 		<property name="format_sql">true</property>
 
-		<!--  <property name="javax.persistence.validation.mode">callback</property> -->
-
+		<!-- <property name="javax.persistence.validation.mode">callback</property> -->
 		<mapping class="com.binse.StockTic"></mapping>
 	</session-factory>
 
