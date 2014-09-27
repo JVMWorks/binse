@@ -3,6 +3,7 @@ package com.binse;
 import static spark.Spark.get;
 import static spark.Spark.post;
 import static spark.Spark.setPort;
+import static spark.Spark.staticFileLocation;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -37,11 +38,15 @@ public class Sparky {
 	public static void main(String[] args) {
 		
 		setPort(Integer.parseInt(System.getenv("PORT")));
-		
+
+		// Will serve all static file are under "/public" in classpath if the route isn't consumed by others routes.
+        // When using Maven, the "/public" folder is assumed to be in "/main/resources"
+		staticFileLocation("/public");
+        
 		// Configure the session factory
 		HibernateUtil.configureSessionFactory();
 		
-		get(new Route("/") {
+		get(new Route("/stats") {
 			@Override
 			public Object handle(Request req, Response res) {
 				StringBuilder form = new StringBuilder();

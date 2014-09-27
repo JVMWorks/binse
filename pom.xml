@@ -22,9 +22,9 @@
 
 	<dependencies>
 		<dependency>
-			<groupId>spark</groupId>
-			<artifactId>spark</artifactId>
-			<version>0.9.9.3-SNAPSHOT</version>
+			<groupId>com.sparkjava</groupId>
+			<artifactId>spark-core</artifactId>
+			<version>1.1.1</version>
 		</dependency>
 		<dependency>
 			<groupId>commons-fileupload</groupId>
