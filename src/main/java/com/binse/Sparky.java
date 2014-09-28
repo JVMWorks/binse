@@ -9,6 +9,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.net.URISyntaxException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -20,6 +21,7 @@ import org.apache.commons.fileupload.FileUploadException;
 import org.apache.commons.fileupload.disk.DiskFileItemFactory;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
 import org.apache.commons.io.FilenameUtils;
+import org.hibernate.HibernateException;
 import org.hibernate.Session;
 
 import spark.Request;
@@ -35,7 +37,7 @@ public class Sparky {
 //		return key + ": " + averages.get(key) + '\n';
 //	}
 
-	public static void main(String[] args) {
+	public static void main(String[] args) throws HibernateException, URISyntaxException {
 		
 		setPort(Integer.parseInt(System.getenv("PORT")));
 
